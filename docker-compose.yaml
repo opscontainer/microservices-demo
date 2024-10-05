@@ -1,0 +1,196 @@
+---
+version: "3"
+services:
+  traefik-proxy:
+    image: traefik:v3.2
+    container_name: traefik-proxy
+    labels:
+      - "traefik.http.routers.api.rule=PathPrefix(`/api`) || PathPrefix(`/dashboard`)" # yamllint disable-line
+      - "traefik.http.routers.api.service=api@internal"
+    command:
+      - --log.level=DEBUG
+      - --api.insecure=true
+      - --api.dashboard=true
+      - --providers.docker
+      - --entrypoints.http.address=:80
+      - --tracing=true
+      - --tracing.addinternals=true
+      - --tracing.serviceName="Edge"
+      - --tracing.sampleRate=100
+      - --tracing.capturedRequestHeaders=X-Trace-Id
+      - --tracing.otlp=true
+      - --tracing.otlp.grpc.endpoint="aws-otel-collector:4317" # yamllint disable-line
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - microservice
+  artifact-service:
+    image: artifact:v1
+    build:
+      context: src/artifact-service
+      dockerfile: Dockerfile
+    container_name: artifact-service
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.artifact-service.loadbalancer.server.port=8000
+      - traefik.http.routers.artifact-service.rule=Host(`api.opscontainer.local`) && PathPrefix(`/artifact`) # yamllint disable-line
+      - traefik.http.routers.artifact-service.rule=PathPrefix(`/artifact`)
+      - traefik.http.routers.artifact-service.entrypoints=http
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=aws-otel-collector:4317
+      - OTEL_RESOURCE_ATTRIBUTES="service.name=artifact-service"
+      - OTEL_EXPORTER_OTLP_INSECURE=true
+      - OTEL_EXPORTER_OTLP_PROTOCOL="grpc"
+      - OTEL_TRACES_EXPORTER="otlp"
+      - OTEL_METRICS_EXPORTER="otlp"
+      - OTEL_LOG_LEVEL="debug"
+      - MONGO_USER=admin
+      - MONGO_PASSWORD=administrator
+      - MONGO_HOST=mongodb
+      - MONGO_PORT=27017
+      - MONGO_DB=artifact
+    depends_on:
+      - mongodb
+    ports:
+      - 8090:8000
+    networks:
+      - microservice
+  product-service:
+    image: product:v1
+    build:
+      context: products
+      dockerfile: Dockerfile
+    container_name: product-service
+    restart: always
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.product-service.loadbalancer.server.port=8000
+      - traefik.http.routers.product-service.rule=Host(`api.opscontainer.local`) && PathPrefix(`/product`) # yamllint disable-line
+      - traefik.http.routers.product-service.rule=PathPrefix(`/product`)
+      - traefik.http.routers.product-service.entrypoints=http
+    environment:
+      - DATABASE_USER=admin
+      - DATABASE_PASSWORD=admin
+      - DATABASE_HOSTNAME=mariadb
+      - DATABASE_PORT=3306
+      - DATABASE_NAME=product
+      - SERVICE_NAME=product-service
+      - OTEL_EXPORTER_OTLP_ENDPOINT=aws-otel-collector:4317
+      - INSECURE_MODE=true
+    depends_on:
+      - mariadb
+    ports:
+      - 8000:8000
+    networks:
+      - microservice
+  ratings-service:
+    image: ratings:v1
+    build:
+      context: ratings
+      dockerfile: Dockerfile
+    container_name: ratings-service
+    restart: always
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.ratings-service.loadbalancer.server.port=8000
+      - traefik.http.routers.ratings-service.rule=Host(`api.opscontainer.local`) && PathPrefix(`/ratings`) # yamllint disable-line
+      - traefik.http.routers.ratings-service.rule=PathPrefix(`/ratings`)
+      - traefik.http.routers.ratings-service.entrypoints=http
+    environment:
+      - DATABASE_USER=admin
+      - DATABASE_PASSWORD=admin
+      - DATABASE_HOSTNAME=mariadb
+      - DATABASE_PORT=3306
+      - DATABASE_NAME=ratings
+      - SERVICE_NAME=ratings-service
+      - OTEL_EXPORTER_OTLP_ENDPOINT=aws-otel-collector:4317
+      - INSECURE_MODE=true
+    depends_on:
+      - mariadb
+    ports:
+      - 8080:8000
+    networks:
+      - microservice
+  mongodb:
+    image: mongodb/mongodb-community-server:5.0.6-ubuntu2004
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=administrator
+    ports:
+      - 27017:27017
+    networks:
+      - microservice
+  demo-cart:
+    image: democart:v1
+    build:
+      context: ui
+      dockerfile: Dockerfile
+    container_name: democart
+    environment:
+      - API_ENDPOINT=http://127.0.0.1
+      - OTLP_ENDPOINT=aws-otel-collector:4317
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.democart.loadbalancer.server.port=8181
+      - traefik.http.routers.democart.rule=PathPrefix(`/`)
+      - traefik.http.routers.democart.entrypoints=http
+      - traefik.http.routers.democart.service=democart
+      - traefik.http.services.democart.loadbalancer.server.port=80
+    restart: always
+    ports:
+      - 8181:80
+    networks:
+      - microservice
+  adminer:
+    image: adminer:4.8.1-standalone
+    container_name: adminer-test-server
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.adminer.loadbalancer.server.port=8080
+      - traefik.http.routers.adminer.rule=Host(`adminer.opscontainer.local`) && PathPrefix(`/adminer`) # yamllint disable-line
+      - traefik.http.routers.adminer.entrypoints=http
+      - traefik.http.routers.adminer.service=adminer
+      - traefik.http.services.adminer-https.loadbalancer.server.port=8080
+    restart: always
+    ports:
+      - 9090:8080
+    networks:
+      - microservice
+  mariadb:
+    image: mariadb:10.6.14-focal
+    restart: always
+    container_name: mariadb-test-server
+    environment:
+      - MARIADB_USER=admin
+      - MARIADB_PASSWORD=admin
+      - MARIADB_ROOT_PASSWORD=admin
+      - MARIADB_DATABASE=microservice
+    ports:
+      - 3306:3306
+    networks:
+      - microservice
+  aws-otel-collector:
+    image: public.ecr.aws/aws-observability/aws-otel-collector:latest
+    container_name: aws-otel-adot-collector
+    command:
+      - --config=/etc/config.yaml
+    environment:
+      - AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY_ID>
+      - AWS_SECRET_ACCESS_KEY=<AWS_SECRET_ACCESS_KEY>
+      - AWS_REGION=<region>
+    ports:
+      - 55680:55680
+      - 4317:4317
+      - 4318:4318
+      - 8889:8888
+    volumes:
+      - ./otel/config.yaml:/etc/config.yaml
+    restart: always
+    networks:
+      - microservice
+
+networks:
+  microservice:
