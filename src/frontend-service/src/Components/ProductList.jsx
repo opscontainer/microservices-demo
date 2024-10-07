@@ -13,14 +13,14 @@ const ProductList = ({ products }) => {
     <>
         <Grid container direction="column" sx={{ height: '100vh' }}>
             <Grid item sx={{ textAlign: 'center', marginBottom: 20 }}>
-            <Typography variant="h2" component="h1" sx={{ padding: 2, top: 5 }}>
+            <Typography variant="h2" component="h1" sx={{ padding: 1, top: 5 }}>
                 Trending Product's
             </Typography>
-            <Typography variant="h4" component="h1" sx={{ padding: 2, top: 5, color: 'rgb(25, 106, 255)' }}>
+            <Typography variant="h4" component="h1" sx={{ top: 5, color: 'rgb(25, 106, 255)' }}>
                 Checkout this treding products
             </Typography>
             </Grid>
-            <Grid item container spacing={5} justifyContent="center" alignItems="center" sx={{ flex: 1 }}>
+            <Grid item container spacing={5} justifyContent="center" alignItems="center">
             {products.map(
                 ({ id, image, name, description, price: priceString }) => (
                 <Grid item key={id} xs={12} sm={6} md={4} lg={3}>
