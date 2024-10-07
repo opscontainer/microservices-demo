@@ -13,6 +13,7 @@ import Settings from '@mui/icons-material/Settings';
 import Logout from '@mui/icons-material/Logout';
 import ShoppingCart from '@mui/icons-material/ShoppingCart';
 import HomeIcon from '@mui/icons-material/Home';
+import Logo from '../assets/logo.png';
 import { Link } from '@mui/material';
 import { Badge } from '@mui/material';
 
@@ -41,10 +42,10 @@ export default function Navigation({ cartCount, onAddToCart }) {
         }}
       >
         <Typography sx={{ font: 'roboto', color: 'white', ml: 2 }}>
-          <Link href="#" underline="none" color="inherit">
+          <Link to={"/"} underline="none" color="inherit">
             <Box
               component="img"
-              src="logo.png"
+              src={Logo}
               alt="Logo"
               sx={{ height: 40 }}
             />
@@ -53,7 +54,7 @@ export default function Navigation({ cartCount, onAddToCart }) {
 
         <Box sx={{ display: 'flex', gap: 3 }}>
           <Typography sx={{ font: 'roboto', color: 'white', display: 'flex', alignItems: 'center' }}>
-            <Link href="#" component="button" underline="none" color="inherit">
+            <Link to={"/"} component="button" underline="none" color="inherit">
             <Box sx={{ display: 'flex' }}> <HomeIcon sx={{ mr: 1 }}/> Home </Box>
             </Link>
           </Typography>
