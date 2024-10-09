@@ -1,36 +1,20 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import Grid from "@mui/material/Grid2";
 import Typography from "@mui/material/Typography";
 import Card from "@mui/material/Card";
+import Grid from "@mui/material/Grid2";
 import CardMedia from "@mui/material/CardMedia";
 import CardContent from "@mui/material/CardContent";
 import Input from "@mui/material/Input";
 import Button from "@mui/material/Button";
-import Snackbar from "@mui/material/Snackbar";
 import Box from "@mui/material/Box";
 import { Link } from "react-router-dom";
 
 import "../main.css";
 
-const Product = () => {
-  const [state, setState] = useState({
-    open: false,
-    vertical: "top",
-    horizontal: "center",
-  });
-
+const Product = ({ cartCount, setCartCount }) => {
   const [quantity, setQuantity] = useState(1);
-
-  const { vertical, horizontal, open } = state;
-
-  const handleClick = () => {
-    setState({ ...state, open: true });
-  };
-
-  const handleClose = () => {
-    setState({ ...state, open: false });
-  };
+  const [notificationOpen, setNotificationOpen] = useState(false);
 
   const product = {
     id: 1,
@@ -59,6 +43,12 @@ const Product = () => {
       price: 39.99,
     },
   ];
+
+  const handleAddToCart = () => {
+    setCartCount(cartCount + 1);
+    setNotificationOpen(true);
+    setTimeout(() => setNotificationOpen(false), 3000);
+  };
 
   return (
     <>
@@ -102,45 +92,41 @@ const Product = () => {
               >
                 {product.description}
               </Typography>
-              <Input
-                type="number"
-                label="Quantity"
-                value={quantity}
-                onChange={(event) => setQuantity(event.target.valueAsNumber)}
-                inputProps={{ min: 1, max: 10 }}
-                sx={{
-                  paddingTop: 2,
-                  borderRadius: "10px",
-                  "& input": { textAlign: "center" },
-                }}
-              />
-
-              <Box sx={{ display: "flex", justifyContent: "center" }}>
-                <Button
-                  onClick={handleClick}
-                  sx={{
-                    color: "white",
-                    backgroundColor: "#7030A0",
-                    fontFamily: "Arial",
-                    fontWeight: "bold",
-                  }}
-                >
-                  Add To Cart
-                </Button>
-              </Box>
-              <Box sx={{ width: 500 }}>
-                <Snackbar
-                  anchorOrigin={{ vertical, horizontal }}
-                  open={open}
-                  onClose={handleClose}
-                  message="Item added to cart"
-                  key={vertical + horizontal}
-                  sx={{
-                    backgroundColor: "rgb(247, 75, 75)",
-                    fontFamily: "Arial",
-                  }}
-                />
-              </Box>
+              <Grid
+                container
+                spacing={2}
+                sx={{ display: "flex", alignItems: "center" }}
+              >
+                <Grid item xs={6}>
+                  <Input
+                    type="number"
+                    label="Quantity"
+                    value={quantity}
+                    onChange={(event) =>
+                      setQuantity(event.target.valueAsNumber)
+                    }
+                    inputProps={{ min: 1, max: 10 }}
+                    sx={{
+                      paddingTop: 2,
+                      borderRadius: "10px",
+                      "& input": { textAlign: "center" },
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <Button
+                    onClick={handleAddToCart}
+                    sx={{
+                      color: "white",
+                      backgroundColor: "#7030A0",
+                      fontFamily: "Arial",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Add To Cart
+                  </Button>
+                </Grid>
+              </Grid>
             </CardContent>
           </Grid>
         </Grid>
@@ -154,8 +140,6 @@ const Product = () => {
         }}
       >
         <CardContent>
-          {/* Recommendation component here */}
-
           <Grid
             container
             direction="column"

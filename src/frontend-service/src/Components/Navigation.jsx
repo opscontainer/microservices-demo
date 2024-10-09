@@ -1,30 +1,31 @@
-import * as React from 'react';
-import Box from '@mui/material/Box';
-import Avatar from '@mui/material/Avatar';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import Divider from '@mui/material/Divider';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import Tooltip from '@mui/material/Tooltip';
-import PersonAdd from '@mui/icons-material/PersonAdd';
-import Settings from '@mui/icons-material/Settings';
-import Logout from '@mui/icons-material/Logout';
-import ShoppingCart from '@mui/icons-material/ShoppingCart';
-import HomeIcon from '@mui/icons-material/Home';
-import Logo from '../assets/logo.png';
-import { Link } from '@mui/material';
-import { Badge } from '@mui/material';
+import { useState } from "react";
+import Box from "@mui/material/Box";
+import Avatar from "@mui/material/Avatar";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import Divider from "@mui/material/Divider";
+import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
+import Tooltip from "@mui/material/Tooltip";
+import PersonAdd from "@mui/icons-material/PersonAdd";
+import Settings from "@mui/icons-material/Settings";
+import Logout from "@mui/icons-material/Logout";
+import ShoppingCart from "@mui/icons-material/ShoppingCart";
+import HomeIcon from "@mui/icons-material/Home";
+import Logo from "../assets/logo.png";
+import { Link } from "react-router-dom";
+import { Badge } from "@mui/material";
 
-
-export default function Navigation({ cartCount, onAddToCart }) {
-  const [anchorEl, setAnchorEl] = React.useState(null);
+export default function Navigation({ cartCount }) {
+  const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
-  const handleClick = (event) => {
+
+  const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
-  const handleClose = () => {
+
+  const handleMenuClose = () => {
     setAnchorEl(null);
   };
 
@@ -32,53 +33,86 @@ export default function Navigation({ cartCount, onAddToCart }) {
     <>
       <Box
         sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
           padding: 2,
-          backgroundColor: '#7030A0',
-          position: 'relative',
-          boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
+          backgroundColor: "#7030A0",
+          position: "relative",
+          borderRadius: "15px",
+          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
         }}
       >
-        <Typography sx={{ font: 'roboto', color: 'white', ml: 2 }}>
-          <Link to={"/"} underline="none" color="inherit">
-            <Box
-              component="img"
-              src={Logo}
-              alt="Logo"
-              sx={{ height: 40 }}
-            />
+        <Typography sx={{ font: "roboto", color: "white", ml: 2 }}>
+          <Link
+            to="/"
+            underline="none"
+            className="no-underline"
+            style={{ color: "white", fontFamily: "Arial" }}
+          >
+            <Box component="img" src={Logo} alt="Logo" sx={{ height: 40 }} />
           </Link>
         </Typography>
 
-        <Box sx={{ display: 'flex', gap: 3 }}>
-          <Typography sx={{ font: 'roboto', color: 'white', display: 'flex', alignItems: 'center' }}>
-            <Link to={"/"} component="button" underline="none" color="inherit">
-            <Box sx={{ display: 'flex' }}> <HomeIcon sx={{ mr: 1 }}/> Home </Box>
+        <Box sx={{ display: "flex", gap: 3 }}>
+          <Typography
+            sx={{
+              font: "roboto",
+              color: "white",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <Link
+              to="/"
+              component="button"
+              underline="none"
+              className="no-underline"
+              style={{ color: "white", fontFamily: "Arial" }}
+            >
+              <Box sx={{ display: "flex" }}>
+                <HomeIcon sx={{ mr: 1 }} />
+                Home
+              </Box>
             </Link>
           </Typography>
-          <Typography sx={{ font: 'roboto', color: 'white', display: 'flex', alignItems: 'center' }}>
-            <Link href="#" underline="none" color="inherit">
-            <Box sx={{ display: 'flex' }}>
-                <Badge badgeContent={cartCount} color="secondary">
-                    <ShoppingCart sx={{ mr: 1 }} />
-                </Badge>Cart
-            </Box>
+          <Typography
+            sx={{
+              font: "roboto",
+              color: "white",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <Link
+              href="#"
+              underline="none"
+              color="inherit"
+              className="no-underline"
+              style={{ color: "white", fontFamily: "Arial" }}
+            >
+              <Box sx={{ display: "flex" }}>
+                <Badge
+                  badgeContent={cartCount.toString()}
+                  color="secondary"
+                  className="no-underline"
+                >
+                  <ShoppingCart sx={{ mr: 1 }} />
+                </Badge>
+                Cart
+              </Box>
             </Link>
-        </Typography>
+          </Typography>
         </Box>
 
         <Tooltip title="Account settings">
           <IconButton
-            onClick={handleClick}
+            onClick={handleMenuClick}
             size="small"
-            sx={{
-              mr: 2,
-            }}
-            aria-controls={open ? 'account-menu' : undefined}
+            sx={{ mr: 2 }}
+            aria-controls={open ? "account-menu" : undefined}
             aria-haspopup="true"
-            aria-expanded={open ? 'true' : undefined}
+            aria-expanded={open ? "true" : undefined}
           >
             <Avatar>A</Avatar>
           </IconButton>
@@ -89,35 +123,35 @@ export default function Navigation({ cartCount, onAddToCart }) {
         anchorEl={anchorEl}
         id="account-menu"
         open={open}
-        onClose={handleClose}
-        onClick={handleClose}
+        onClose={handleMenuClose}
+        onClick={handleMenuClose}
       >
-        <MenuItem onClick={handleClose}>
+        <MenuItem onClick={handleMenuClose}>
           <Avatar /> Profile
         </MenuItem>
-        <MenuItem onClick={handleClose}>
+        <MenuItem onClick={handleMenuClose}>
           <Avatar /> My account
         </MenuItem>
         <Divider />
-        <MenuItem onClick={handleClose}>
+        <MenuItem onClick={handleMenuClose}>
           <ListItemIcon>
             <PersonAdd fontSize="small" />
           </ListItemIcon>
           Add another account
         </MenuItem>
-        <MenuItem onClick={handleClose}>
+        <MenuItem onClick={handleMenuClose}>
           <ListItemIcon>
             <Settings fontSize="small" />
           </ListItemIcon>
           Settings
         </MenuItem>
-        <MenuItem onClick={handleClose}>
+        <MenuItem onClick={handleMenuClose}>
           <ListItemIcon>
             <Logout fontSize="small" />
           </ListItemIcon>
           Logout
         </MenuItem>
       </Menu>
-      </>
+    </>
   );
 }
